@@ -1,1 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pool CX Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
+    <h1>🔐 Pool CX Login</h1>
 
+    <input id="email" type="email" placeholder="Email" style="padding:10px; margin:5px;"><br>
+    <input id="password" type="password" placeholder="Password" style="padding:10px; margin:5px;"><br>
+    <button id="login-btn" style="padding:10px 20px;">Login / Sign Up</button>
+
+    <p id="status" style="margin-top:20px;"></p>
+
+    <script>
+      // Supabase credentials
+      const SUPABASE_URL = "https://epngmvsotwymyfmrtzfs.supabase.co";
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwbmdtdnNvdHd5bXlmbXJ0emZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3MjEzNjMsImV4cCI6MjA3NjI5NzM2M30.z779Vflq8ip9qchjV4EqxM37p9hJmeQ87L-qLAXiJiI";
+
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const statusEl = document.getElementById("status");
+
+      // Redirect if already logged in
+      async function redirectIfLoggedIn() {
+        try {
+          const { data: { user }, error } = await supabaseClient.auth.getUser();
+          if (error) console.error("getUser error:", error);
+          if (user) {
+            console.log("User already logged in:", user.email);
+            window.location.href = "dashboard.html";
+          }
+        } catch (err) {
+          console.error("Unexpected error checking login:", err);
+        }
+      }
+      redirectIfLoggedIn();
+
+      // Handle login/signup
+      document.getElementById("login-btn").addEventListener("click", async () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        console.log("Login attempt:", email);
+
+        try {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            console.warn("Sign in failed, trying signup...", error.message);
+
+            // Try sign-up if user doesn’t exist yet
+            const { data: signupData, error: signupError } =
+              await supabaseClient.auth.signUp({ email, password });
+
+            if (signupError) {
+              console.error("Sign up failed:", signupError.message);
+              statusEl.textContent = "❌ " + signupError.message;
+            } else {
+              console.log("Sign up success:", signupData);
+              statusEl.textContent =
+                "✅ Account created! Please check your email to confirm.";
+            }
+          } else {
+            console.log("Sign in success:", data);
+            statusEl.textContent = "✅ Logged in as " + data.user.email;
+
+            setTimeout(() => {
+              window.location.href = "dashboard.html";
+            }, 1000);
+          }
+        } catch (err) {
+          console.error("Unexpected error during login/signup:", err);
+          statusEl.textContent = "❌ An unexpected error occurred. Check console.";
+        }
+      });
+    </script>
+  </body>
+</html>
