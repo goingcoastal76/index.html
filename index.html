@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pool CX Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.5/dist/umd/supabase.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    h2 { text-align: center; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background-color: #0070f3;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .msg {
+      margin-top: 10px;
+      color: #333;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Pool CX Login</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="signup">Sign Up</button>
+    <button id="login">Log In</button>
+    <p class="msg" id="msg"></p>
+  </div>
+
+  <script>
+    const SUPABASE_URL = window.env?.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL_HERE';
+    const SUPABASE_KEY = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_KEY_HERE';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const msg = document.getElementById("msg");
+
+    document.getElementById("signup").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      msg.textContent = error ? error.message : "Signup successful! Check your email to confirm.";
+    };
+
+    document.getElementById("login").onclick = async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      msg.textContent = error ? error.message : "Login successful!";
+    };
+  </script>
+</body>
+</html>
